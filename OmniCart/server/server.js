@@ -47,10 +47,15 @@ app.use((err, req, res, next) => {
 // Start server (for local development)
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("❌ Database connection failed completely:");
+    console.error(error);
   });
-});
 
 export default app;
