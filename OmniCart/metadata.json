@@ -1,0 +1,5 @@
+{
+  "name": "OmniCart",
+  "description": "A unified multi-vendor shopping cart application aggregating Amazon, Walmart, Target, and more into a single seamless checkout experience.",
+  "requestFramePermissions": []
+}
