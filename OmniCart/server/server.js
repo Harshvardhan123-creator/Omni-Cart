@@ -29,9 +29,14 @@ const connectDB = async () => {
   }
 };
 
-// Routes
+// Health check with DB status
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'OmniCart API is running' });
+  const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+  res.json({ 
+    status: 'OK', 
+    database: dbStatus,
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use('/api/products', productRoutes);
@@ -39,24 +44,21 @@ app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/compare-prices', priceRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
-
-// Start server (for local development)
+// Start server
 const PORT = process.env.PORT || 5000;
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server initialised on port ${PORT}`);
+  console.log(`📡 Mode: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Connect to Database asynchronously
+  connectDB()
+    .then(() => console.log('✅ Database connection established'))
+    .catch((err) => {
+      console.error('❌ CRITICAL: Database connection failed!');
+      console.error(`Reason: ${err.message}`);
+      console.log('💡 TIP: Check if your IP is whitelisted in MongoDB Atlas.');
     });
-  })
-  .catch((error) => {
-    console.error("❌ Database connection failed completely:");
-    console.error(error);
-  });
+});
 
 export default app;
