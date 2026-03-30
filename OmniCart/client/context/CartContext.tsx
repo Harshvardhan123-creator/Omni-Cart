@@ -31,8 +31,25 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem('omnicart-cart');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [notification, setNotification] = useState<string | null>(null);
+
+  // Persistence: Save to local storage whenever cart changes
+  useEffect(() => {
+    localStorage.setItem('omnicart-cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Legacy Check: Remove items with mock IDs ("1", "2") from previous versions
+  useEffect(() => {
+    const hasLegacyData = cartItems.some(item => item.productId === '1' || item.productId === '2');
+    if (hasLegacyData) {
+      console.log("🧹 Legacy cart data detected. Purging mock items...");
+      setCartItems(prev => prev.filter(item => item.productId !== '1' && item.productId !== '2'));
+    }
+  }, []);
 
   const showNotification = (msg: string) => {
     setNotification(msg);
